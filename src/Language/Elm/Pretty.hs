@@ -342,7 +342,7 @@ definition env def =
       let
         (names, body) = lambdas env e
       in
-      pretty name <+> ":" <+> type_ env 0 t <> line <>
+      pretty name <+> ":" <+> nest 4 (type_ env 0 t) <> line <>
       (case names of
         [] ->
           pretty name <+> "="
