@@ -20,19 +20,13 @@ extra-source-files:
 description:         Please see the README on GitHub at <https://github.com/folq/elm-syntax#readme>
 
 dependencies:
-- aeson
 - base >= 4.7 && < 5
 - bound
 - deriving-compat
-- generics-sop
 - prettyprinter
 - protolude
 - text
 - unordered-containers
-
-- servant
-- servant-foreign
-- lens
 
 ghc-options:
   - -Wall
