@@ -372,12 +372,12 @@ expression env prec expr =
       local $ locals env var
 
     (Expression.appsView -> (Expression.Proj f, arg:args)) ->
-      atomExpressionApps env prec (expression env projPrec arg <> dot <> field f) args
+      atomApps (expression env) prec (expression env projPrec arg <> dot <> field f) args
 
     (Expression.appsView -> (Expression.Global qname@(Name.Qualified _ name), args)) ->
       case fixity qname of
         Nothing ->
-          atomExpressionApps env prec (qualified env qname) args
+          atomApps (expression env) prec (qualified env qname) args
 
         Just (leftPrec, opPrec, rightPrec) ->
           case args of
@@ -388,13 +388,13 @@ expression env prec expr =
                 expression env rightPrec arg2
 
             arg1:arg2:args' ->
-              expressionApps env prec (Expression.apps (Expression.Global qname) [arg1, arg2]) args'
+              apps (expression env) prec (Expression.apps (Expression.Global qname) [arg1, arg2]) args'
 
             _ ->
-              atomExpressionApps env prec (parens $ pretty name) args
+              atomApps (expression env) prec (parens $ pretty name) args
 
     (Expression.appsView -> (fun, args@(_:_))) ->
-      expressionApps env prec fun args
+      apps (expression env) prec fun args
 
     Expression.Global _ ->
       panic "Language.Elm.Pretty expression Global"
@@ -465,26 +465,6 @@ expression env prec expr =
     Expression.Float f ->
       pretty f
 
-expressionApps :: Environment v -> Int -> Expression v -> [Expression v] -> Doc ann
-expressionApps env prec fun args =
-  case args of
-    [] ->
-      expression env prec fun
-
-    _ ->
-      parensWhen (prec > appPrec) $
-        expression env appPrec fun <+> hsep (expression env (appPrec + 1) <$> args)
-
-atomExpressionApps :: Environment v -> Int -> Doc ann -> [Expression v] -> Doc ann
-atomExpressionApps env prec fun args =
-  case args of
-    [] ->
-      fun
-
-    _ ->
-      parensWhen (prec > appPrec) $
-        fun <+> hsep (expression env (appPrec + 1) <$> args)
-
 lets :: Environment v -> Expression v -> ([Doc ann], Doc ann)
 lets env expr =
   case expr of
@@ -537,9 +517,26 @@ pattern env prec pat =
     Pattern.Con con [] ->
       qualified env con
 
-    Pattern.Con con pats ->
-      parensWhen (prec > appPrec) $
-        qualified env con <+> hsep (pattern env (appPrec + 1) <$> pats)
+    Pattern.Con con@(Name.Qualified _ name) pats ->
+      case fixity con of
+        Nothing ->
+          parensWhen (prec > appPrec) $
+            qualified env con <+> hsep (pattern env (appPrec + 1) <$> pats)
+
+        Just (leftPrec, opPrec, rightPrec) ->
+          case pats of
+            [pat1, pat2] ->
+              parensWhen (prec > opPrec) $
+                pattern env leftPrec pat1 <+> pretty name <>
+                (if twoLineOperator con then line else space) <>
+                pattern env rightPrec pat2
+
+            pat1:pat2:pats' ->
+              apps (pattern env) prec (Pattern.Con con [pat1, pat2]) pats'
+
+            _ ->
+              parensWhen (prec > appPrec) $
+                qualified env con <+> hsep (pattern env (appPrec + 1) <$> pats)
 
     Pattern.List pats ->
       list $ pattern env 0 <$> pats
@@ -565,7 +562,7 @@ type_ env prec t =
     (Type.appsView -> (Type.Global qname@(Name.Qualified _ name), args)) ->
       case fixity qname of
         Nothing ->
-          atomTypeApps env prec (qualified env qname) args
+          atomApps (type_ env) prec (qualified env qname) args
 
         Just (leftPrec, opPrec, rightPrec) ->
           case args of
@@ -576,13 +573,13 @@ type_ env prec t =
                 type_ env rightPrec arg2
 
             arg1:arg2:args' ->
-              typeApps env prec (Type.apps (Type.Global qname) [arg1, arg2]) args'
+              apps (type_ env) prec (Type.apps (Type.Global qname) [arg1, arg2]) args'
 
             _ ->
-              atomTypeApps env prec (parens $ pretty name) args
+              atomApps (type_ env) prec (parens $ pretty name) args
 
     (Type.appsView -> (fun, args@(_:_))) ->
-      typeApps env prec fun args
+      apps (type_ env) prec fun args
 
     Type.Global _ ->
       panic "Language.Elm.Pretty type_ Global"
@@ -600,28 +597,28 @@ type_ env prec t =
         | (f, type') <- fields
         ]
 
-typeApps :: Environment v -> Int -> Type v -> [Type v] -> Doc ann
-typeApps env prec fun args =
+-------------------------------------------------------------------------------
+-- Utils
+
+apps :: (Int -> a -> Doc ann) -> Int -> a -> [a] -> Doc ann
+apps f prec fun args =
   case args of
     [] ->
-      type_ env prec fun
+      f prec fun
 
     _ ->
       parensWhen (prec > appPrec) $
-        type_ env appPrec fun <+> hsep (type_ env (appPrec + 1) <$> args)
+        f appPrec fun <+> hsep (f (appPrec + 1) <$> args)
 
-atomTypeApps :: Environment v -> Int -> Doc ann -> [Type v] -> Doc ann
-atomTypeApps env prec fun args =
+atomApps :: (Int -> a -> Doc ann) -> Int -> Doc ann -> [a] -> Doc ann
+atomApps f prec fun args =
   case args of
     [] ->
       fun
 
     _ ->
       parensWhen (prec > appPrec) $
-        fun <+> hsep (type_ env (appPrec + 1) <$> args)
-
--------------------------------------------------------------------------------
--- Utils
+        fun <+> hsep (f (appPrec + 1) <$> args)
 
 parensWhen :: Bool -> Doc ann -> Doc ann
 parensWhen b =
