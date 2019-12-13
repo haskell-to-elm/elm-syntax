@@ -1,7 +1,30 @@
 {-# language NoImplicitPrelude #-}
 {-# language OverloadedStrings #-}
 {-# language ViewPatterns #-}
-module Language.Elm.Pretty where
+module Language.Elm.Pretty
+  (
+  -- * Modules
+    modules
+  , module_
+  -- * Environments
+  , Environment(..)
+  , emptyEnvironment
+  , extend
+  -- * Pretty-printing names
+  , local
+  , field
+  , constructor
+  , moduleName
+  , qualified
+  -- * Pretty-printing definitions
+  , definition
+  -- * Pretty-printing expressions
+  , expression
+  -- * Pretty-printing pattern
+  , pattern
+  -- * Pretty-printing types
+  , type_
+  ) where
 
 import Protolude hiding (Type, local, list, moduleName)
 
@@ -25,8 +48,74 @@ import Language.Elm.Type (Type)
 import qualified Language.Elm.Type as Type
 
 -------------------------------------------------------------------------------
--- Environments
+-- * Modules
 
+-- | Group the given definitions by their defining module, and generate an Elm
+-- module for each group.
+modules :: [Definition] -> HashMap Name.Module (Doc ann)
+modules defs =
+  let
+    defsByModule =
+      foldl'
+        (HashMap.unionWith (<>))
+        mempty
+        [ HashMap.singleton m [def]
+        | def <- defs
+        , let
+            (Name.Qualified m _) =
+              Definition.name def
+        ]
+  in
+  HashMap.mapWithKey module_ defsByModule
+
+-- | Generate an Elm module containing the given definitions.
+module_ :: Name.Module -> [Definition] -> Doc ann
+module_ mname defs =
+  let
+    usedNames =
+      HashSet.fromList
+        [ Name.Local name
+        | Name.Qualified _ name <- Definition.name <$> defs
+        ]
+
+    env =
+      (emptyEnvironment mname)
+        { freshLocals = filter (not . (`HashSet.member` usedNames)) $ freshLocals (emptyEnvironment mname)
+        }
+
+    imports =
+      sort $
+      HashSet.toList $
+      flip HashSet.difference defaultImports $
+      HashSet.filter (/= mname) $
+      HashSet.map (\(Name.Qualified m _) -> m) $
+      HashSet.filter (isNothing . defaultImport) $
+      foldMap (Definition.foldMapGlobals HashSet.singleton) defs
+  in
+  "module" <+> moduleName mname <+> "exposing (..)" <> line <> line <>
+  mconcat ["import" <+> moduleName import_ <> line | import_ <- imports] <> line <> line <>
+  mconcat (intersperse (line <> line <> line) [definition env def | def <- defs])
+
+defaultImports :: HashSet Name.Module
+defaultImports =
+  HashSet.fromList
+    [ ["Basics"]
+    , ["List"]
+    , ["Maybe"]
+    , ["Result"]
+    , ["String"]
+    , ["Char"]
+    , ["Tuple"]
+    , ["Debug"]
+    , ["Platform"]
+    , ["Cmd"]
+    , ["Sub"]
+    ]
+
+-------------------------------------------------------------------------------
+-- * Environments
+
+-- | A pretty-printing environment with local variables in @v@.
 data Environment v = Environment
   { locals :: v -> Name.Local
   , freshLocals :: [Name.Local]
@@ -84,7 +173,7 @@ extendPat env pat =
     }
 
 -------------------------------------------------------------------------------
--- Names
+-- * Pretty-printing names
 
 local :: Name.Local -> Doc ann
 local (Name.Local l) =
@@ -271,69 +360,7 @@ twoLineOperator qname =
       False
 
 -------------------------------------------------------------------------------
--- Modules
-
-modules :: [Definition] -> HashMap Name.Module (Doc ann)
-modules defs =
-  let
-    defsByModule =
-      foldl'
-        (HashMap.unionWith (<>))
-        mempty
-        [ HashMap.singleton m [def]
-        | def <- defs
-        , let
-            (Name.Qualified m _) =
-              Definition.name def
-        ]
-  in
-  HashMap.mapWithKey module_ defsByModule
-
-module_ :: Name.Module -> [Definition] -> Doc ann
-module_ mname defs =
-  let
-    usedNames =
-      HashSet.fromList
-        [ Name.Local name
-        | Name.Qualified _ name <- Definition.name <$> defs
-        ]
-
-    env =
-      (emptyEnvironment mname)
-        { freshLocals = filter (not . (`HashSet.member` usedNames)) $ freshLocals (emptyEnvironment mname)
-        }
-
-    imports =
-      sort $
-      HashSet.toList $
-      flip HashSet.difference defaultImports $
-      HashSet.filter (/= mname) $
-      HashSet.map (\(Name.Qualified m _) -> m) $
-      HashSet.filter (isNothing . defaultImport) $
-      foldMap (Definition.foldMapGlobals HashSet.singleton) defs
-  in
-  "module" <+> moduleName mname <+> "exposing (..)" <> line <> line <>
-  mconcat ["import" <+> moduleName import_ <> line | import_ <- imports] <> line <> line <>
-  mconcat (intersperse (line <> line <> line) [definition env def | def <- defs])
-
-defaultImports :: HashSet Name.Module
-defaultImports =
-  HashSet.fromList
-    [ ["Basics"]
-    , ["List"]
-    , ["Maybe"]
-    , ["Result"]
-    , ["String"]
-    , ["Char"]
-    , ["Tuple"]
-    , ["Debug"]
-    , ["Platform"]
-    , ["Cmd"]
-    , ["Sub"]
-    ]
-
--------------------------------------------------------------------------------
--- Definitions
+-- * Definitions
 
 definition :: Environment Void -> Definition -> Doc ann
 definition env def =
@@ -363,7 +390,7 @@ definition env def =
       indent 4 (type_ env 0 t)
 
 -------------------------------------------------------------------------------
--- Expressions
+-- * Expressions
 
 expression :: Environment v -> Int -> Expression v -> Doc ann
 expression env prec expr =
@@ -503,7 +530,7 @@ lambdas env expr =
       ([], expression env lamPrec expr)
 
 -------------------------------------------------------------------------------
--- Patterns
+-- * Patterns
 
 pattern :: Environment (Bound.Var Int v) -> Int -> Pattern Int -> Doc ann
 pattern env prec pat =
@@ -551,7 +578,7 @@ pattern env prec pat =
       pretty f
 
 -------------------------------------------------------------------------------
--- Types
+-- * Types
 
 type_ :: Environment v -> Int -> Type v -> Doc ann
 type_ env prec t =
