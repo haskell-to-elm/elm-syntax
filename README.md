@@ -1,4 +1,4 @@
-# elm-syntax
+# elm-syntax [![Hackage](https://img.shields.io/hackage/v/elm-syntax.svg)](https://hackage.haskell.org/package/elm-syntax)
 
 A library for generating Elm syntax from Haskell in a scope-safe way.
 
