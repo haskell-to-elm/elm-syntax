@@ -21,12 +21,12 @@ description:         Please see the README on GitHub at <https://github.com/folq
 
 dependencies:
 - base >= 4.7 && < 5
-- bound
-- deriving-compat
-- prettyprinter
-- protolude
-- text
-- unordered-containers
+- bound >= 2.0.0
+- deriving-compat >= 0.5
+- prettyprinter >= 1.2.1
+- protolude >= 0.2.3
+- text >= 1.2.0
+- unordered-containers >= 0.2.8
 
 ghc-options:
   - -Wall
