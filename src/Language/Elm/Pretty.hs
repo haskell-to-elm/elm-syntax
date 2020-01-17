@@ -457,6 +457,17 @@ expression env prec expr =
     Expression.Proj f ->
       "." <> field f
 
+    Expression.Case bool_
+      [ (Pattern.Con "Basics.True" [], unusedScope -> Just true)
+      , (Pattern.Con "Basics.False" [], unusedScope -> Just false)
+      ] ->
+      parensWhen (prec > ifPrec) $
+        "if" <+> expression env 0 bool_ <+> "then" <> line <>
+          indent 4 (expression env 0 true) <> line <>
+        line <>
+        "else" <> line <>
+          indent 4 (expression env 0 false)
+
     Expression.Case expr' branches ->
       parensWhen (prec > casePrec) $
         "case" <+> expression env 0 expr' <+> "of" <> line <>
@@ -471,14 +482,6 @@ expression env prec expr =
                 extendPat env pat
           ]
         )
-
-    Expression.If expr' true false ->
-      parensWhen (prec > ifPrec) $
-        "if" <+> expression env 0 expr' <+> "then" <> line <>
-          indent 4 (expression env 0 true) <> line <>
-        line <>
-        "else" <> line <>
-          indent 4 (expression env 0 false)
 
     Expression.List exprs ->
       list $ expression env 0 <$> exprs
@@ -663,3 +666,7 @@ casePrec = 0
 ifPrec = 0
 funPrec = 0
 projPrec = 11
+
+unusedScope :: (Monad f, Traversable f) => Bound.Scope b f a -> Maybe (f a)
+unusedScope =
+  traverse (Bound.unvar (const Nothing) pure) . Bound.fromScope
