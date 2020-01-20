@@ -50,8 +50,8 @@ simplifyDefinition def =
 -- * @x :: [y, z, ...] = [x, y, z, ...]@
 -- * Calls to @String.join@, @String.concat@, @List.concat@, and @++@ with
 --   known arguments are simplified. For example,
---
 --   @String.join "/" [Config.api, "endpoint"] = Config.api ++ "/endpoint"@
+-- * @(\x. e x) = e@
 -- * Inline @x@ in @e'@ in
 --   @
 --   let x = e in e'
