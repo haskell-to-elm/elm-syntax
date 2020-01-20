@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Simplify case-of-case expressions
+
 ## 0.2.0.0
 
 - Add simplification module with some useful optimisations
