@@ -435,7 +435,7 @@ expression env prec expr =
           (bindings, body) =
             lets env expr
         in
-        "let"
+        line <> "let"
         <> line <> indent 4 (mconcat $ intersperse (line <> line) bindings)
         <> line <> "in"
         <> line <> body
