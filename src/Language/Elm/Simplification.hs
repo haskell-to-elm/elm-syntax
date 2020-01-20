@@ -5,6 +5,8 @@ module Language.Elm.Simplification
   , simplifyExpression
   ) where
 
+import Protolude
+
 import Bound
 import qualified Bound.Scope as Scope
 import Bound.Var (unvar)
@@ -67,6 +69,7 @@ simplifyDefinition def =
 --   @
 --   is simplified to @let xs = es in branch@ provided that @e@ matches none of
 --   @prefixBranches@ and that it matches @pat@.
+-- * case-of-case
 --
 simplifyExpression
   :: Expression v
@@ -171,9 +174,21 @@ simplifyApplication expr args =
       in
         case findMatchingBranch scrutinee' branches of
           Nothing ->
-            Expression.apps
-              (Expression.Case scrutinee' $ fmap simplifyScope <$> branches)
-              args
+            case scrutinee' of
+              Expression.Case innerScrutinee innerBranches ->
+                simplifyApplication
+                  (Expression.Case
+                    innerScrutinee
+                    [ (pat, toScope $ Expression.Case (fromScope branch) (second (fmap F) <$> branches))
+                    | (pat, branch) <- innerBranches
+                    ]
+                  )
+                  args
+
+              _ ->
+                Expression.apps
+                  (Expression.Case scrutinee' $ fmap simplifyScope <$> branches)
+                  args
 
           Just expr' ->
             simplifyApplication expr' args
