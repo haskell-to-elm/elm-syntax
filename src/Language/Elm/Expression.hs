@@ -11,6 +11,7 @@ module Language.Elm.Expression where
 import Protolude
 
 import Bound
+import Bound.Var (unvar)
 import Data.Bifoldable
 import Data.Eq.Deriving
 import Data.Ord.Deriving
@@ -103,6 +104,25 @@ if_ bool_ true false =
 
 tuple :: Expression v -> Expression v -> Expression v
 tuple e1 e2 = apps "Basics.," [e1, e2]
+
+lets :: Eq b => [(b, Expression v)] -> Scope b Expression v -> Expression v
+lets =
+  go (panic "Language.Elm.Expression.lets unbound var") identity
+  where
+    go :: Eq b => (b -> v') -> (v -> v') -> [(b, Expression v)] -> Scope b Expression v -> Expression v'
+    go boundVar freeVar bindings scope =
+      case bindings of
+        [] ->
+          unvar boundVar freeVar <$> fromScope scope
+
+        (v, e):bindings' ->
+          Let (freeVar <$> e) $
+            toScope $
+            go
+              (\b -> if b == v then B () else F $ boundVar b)
+              (F . freeVar)
+              bindings'
+              scope
 
 foldMapGlobals
   :: Monoid m

@@ -4,11 +4,13 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE ViewPatterns #-}
 module Language.Elm.Name where
 
 import Protolude
 
 import Data.String
+import qualified Data.Char as Char
 import qualified Data.Text as Text
 
 type Module = [Text]
@@ -20,6 +22,21 @@ newtype Local = Local Text
 
 data Qualified = Qualified Module Text
   deriving (Eq, Ord, Show, Generic, Hashable)
+
+isConstructor :: Qualified -> Bool
+isConstructor name =
+  case name of
+    "List.::" ->
+      True
+
+    "Basics.," ->
+      True
+
+    Qualified _ (Text.uncons -> Just (firstChar, _)) ->
+      Char.isUpper firstChar
+
+    _ ->
+      False
 
 instance IsString Qualified where
   fromString s =
