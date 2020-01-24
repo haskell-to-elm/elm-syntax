@@ -2,6 +2,7 @@
 
 ## Unreleased changes
 
+- Handle Basics.() in isConstructor check
 - Simplify case-of-case expressions
 
 ## 0.2.0.0

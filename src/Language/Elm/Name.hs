@@ -32,6 +32,9 @@ isConstructor name =
     "Basics.," ->
       True
 
+    "Basics.()" ->
+      True
+
     Qualified _ (Text.uncons -> Just (firstChar, _)) ->
       Char.isUpper firstChar
 
