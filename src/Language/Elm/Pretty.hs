@@ -152,7 +152,12 @@ extendPat env pat =
 
     occurrences =
       HashSet.toList occurrencesSet
+  in
+  extendMany env occurrences
 
+extendMany :: Environment v -> [Int] -> Environment (Bound.Var Int v)
+extendMany env occurrences =
+  let
     bindings =
       HashMap.fromList $
         zip occurrences $ freshLocals env
@@ -163,7 +168,7 @@ extendPat env pat =
     lookupVar i =
       case HashMap.lookup i bindings of
         Nothing ->
-          error "Unbound pattern variable"
+          error "Language.Elm.Pretty unbound pattern variable"
 
         Just v ->
           v
@@ -366,11 +371,18 @@ twoLineOperator qname =
 definition :: Environment Void -> Definition -> Doc ann
 definition env def =
   case def of
-    Definition.Constant (Name.Qualified _ name) t e ->
+    Definition.Constant (Name.Qualified _ name) numTypeParams t e ->
       let
-        (names, body) = lambdas env e
+        typeParams =
+          [0..numTypeParams - 1]
+
+        typeEnv =
+          extendMany env typeParams
+
+        (names, body) =
+          lambdas env e
       in
-      pretty name <+> ":" <+> nest 4 (type_ env 0 t) <> line <>
+      pretty name <+> ":" <+> nest 4 (type_ typeEnv 0 $ Bound.fromScope t) <> line <>
       (case names of
         [] ->
           pretty name <+> "="
@@ -379,16 +391,30 @@ definition env def =
           pretty name <+> hsep (local <$> names) <+> "=") <>
       line <> indent 4 body
 
-    Definition.Type (Name.Qualified _ name) constrs ->
-      "type" <+> pretty name <> line <>
+    Definition.Type (Name.Qualified _ name) numParams constrs ->
+      let
+        params =
+          [0..numParams - 1]
+
+        env' =
+          extendMany env params
+      in
+      "type" <+> pretty name <+> hsep (local . locals env' . Bound.B <$> params) <> line <>
         indent 4 ("=" <+>
           mconcat
             (intersperse (line <> "| ")
-              [constructor c <+> hsep (type_ env (appPrec + 1) <$> ts) | (c, ts) <- constrs]))
+              [constructor c <+> hsep (type_ env' (appPrec + 1) . Bound.fromScope <$> ts) | (c, ts) <- constrs]))
 
-    Definition.Alias (Name.Qualified _ name) t ->
-      "type alias" <+> pretty name <+> "=" <> line <>
-      indent 4 (type_ env 0 t)
+    Definition.Alias (Name.Qualified _ name) numParams t ->
+      let
+        params =
+          [0..numParams - 1]
+
+        env' =
+          extendMany env params
+      in
+      "type alias" <+> pretty name <+> hsep (local . locals env' . Bound.B <$> params) <+> "=" <> line <>
+      indent 4 (type_ env' 0 $ Bound.fromScope t)
 
 -------------------------------------------------------------------------------
 -- * Expressions

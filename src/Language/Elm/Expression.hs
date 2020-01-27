@@ -4,6 +4,7 @@
 {-# language DeriveGeneric #-}
 {-# language DeriveTraversable #-}
 {-# language OverloadedStrings #-}
+{-# language ScopedTypeVariables #-}
 {-# language StandaloneDeriving #-}
 {-# language TemplateHaskell #-}
 module Language.Elm.Expression where
@@ -11,6 +12,8 @@ module Language.Elm.Expression where
 import Bound
 import Bound.Var (unvar)
 import Control.Monad
+import Data.Bifoldable
+import Data.Bifunctor
 import Data.Eq.Deriving
 import Data.Ord.Deriving
 import Data.String
@@ -41,18 +44,55 @@ instance Applicative Expression where
   (<*>) = ap
 
 instance Monad Expression where
-  Var v >>= f = f v
-  Global g >>= _ = Global g
-  App e1 e2 >>= f = App (e1 >>= f) (e2 >>= f)
-  Let e s >>= f = Let (e >>= f) (s >>>= f)
-  Lam s >>= f = Lam (s >>>= f)
-  Record fs >>= f = Record [(fname, e >>= f) | (fname, e) <- fs]
-  Proj f >>= _ = Proj f
-  Case e brs >>= f = Case (e >>= f) [(pat, s >>>= f) | (pat, s) <- brs]
-  List es >>= f = List ((>>= f) <$> es)
-  String s >>= _ = String s
-  Int n >>= _ = Int n
-  Float f >>= _ = Float f
+  (>>=) =
+    flip $ bind Global
+
+bind :: forall v v'. (Name.Qualified -> Expression v') -> (v -> Expression v') -> Expression v -> Expression v'
+bind global var expression =
+  case expression of
+    Var v ->
+      var v
+
+    Global g ->
+      global g
+
+    App t1 t2 ->
+      App (bind global var t1) (bind global var t2)
+
+    Let e s ->
+      Let (bind global var e) (bindScope s)
+
+    Lam s ->
+      Lam (bindScope s)
+
+    Record fields ->
+      Record $ second (bind global var) <$> fields
+
+    Proj fname ->
+      Proj fname
+
+    Case scrutinee branches ->
+      Case
+        (bind global var scrutinee)
+        (second bindScope <$> branches)
+
+    List es ->
+      List $ bind global var <$> es
+
+    String s ->
+      String s
+
+    Int i ->
+      Int i
+
+    Float f ->
+      Float f
+  where
+    bindScope :: Scope b Expression v -> Scope b Expression v'
+    bindScope =
+      toScope .
+      bind (fmap F . global) (unvar (pure . B) (fmap F . var)) .
+      fromScope
 
 deriving instance Eq v => Eq (Expression v)
 deriving instance Ord v => Ord (Expression v)
@@ -154,7 +194,7 @@ foldMapGlobals f expr =
     Case e branches ->
       foldMapGlobals f e <>
       foldMap
-        (\(pat, scope) -> Pattern.foldMapGlobals f pat <> foldMapGlobals f (Bound.fromScope scope))
+        (bifoldMap (Pattern.foldMapGlobals f) (foldMapGlobals f .Bound.fromScope))
         branches
 
     List es ->

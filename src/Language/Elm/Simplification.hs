@@ -28,8 +28,8 @@ simplifyDefinition
   -> Definition
 simplifyDefinition def =
   case def of
-    Definition.Constant name type_ expr ->
-      Definition.Constant name type_ $ simplifyExpression expr
+    Definition.Constant name numTypeParams type_ expr ->
+      Definition.Constant name numTypeParams type_ $ simplifyExpression expr
 
     Definition.Type {} ->
       def

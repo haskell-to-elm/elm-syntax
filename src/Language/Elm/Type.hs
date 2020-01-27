@@ -2,11 +2,16 @@
 {-# language DeriveFunctor #-}
 {-# language DeriveTraversable #-}
 {-# language OverloadedStrings #-}
+{-# language TemplateHaskell #-}
 module Language.Elm.Type where
 
 import Control.Monad
+import Data.Bifunctor
+import Data.Eq.Deriving (deriveEq1)
 import Data.Foldable
+import Data.Ord.Deriving (deriveOrd1)
 import Data.String
+import Text.Show.Deriving (deriveShow1)
 
 import qualified Language.Elm.Name as Name
 
@@ -18,16 +23,35 @@ data Type v
   | Record [(Name.Field, Type v)]
   deriving (Eq, Ord, Show, Functor, Foldable, Traversable)
 
+deriveEq1 ''Type
+deriveOrd1 ''Type
+deriveShow1 ''Type
+
 instance Applicative Type where
   pure = Var
   (<*>) = ap
 
 instance Monad Type where
-  Var v >>= f = f v
-  Global g >>= _ = Global g
-  App t1 t2 >>= f = App (t1 >>= f) (t2 >>= f)
-  Fun t1 t2 >>= f = Fun (t1 >>= f) (t2 >>= f)
-  Record fields >>= f = Record [(n, t >>= f) | (n, t) <- fields]
+  (>>=) =
+    flip $ bind Global
+
+bind :: (Name.Qualified -> Type v') -> (v -> Type v') -> Type v -> Type v'
+bind global var type_ =
+  case type_ of
+    Var v ->
+      var v
+
+    Global g ->
+      global g
+
+    App t1 t2 ->
+      App (bind global var t1) (bind global var t2)
+
+    Fun t1 t2 ->
+      Fun (bind global var t1) (bind global var t2)
+
+    Record fields ->
+      Record $ second (bind global var) <$> fields
 
 instance IsString (Type v) where
   fromString = Global . fromString

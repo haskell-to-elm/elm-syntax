@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 0ef776b3daae1808ec6d9199f2bba0aa2018977a5ba9d2f847c6940ecbcf85aa
+-- hash: 4852b94fa3c78222b53566d23352534c8fab264e301bc13f0c11d479c70ec497
 
 name:           elm-syntax
 version:        0.2.0.0
@@ -45,7 +45,7 @@ library
   build-depends:
       base >=4.7 && <5
     , bound >=2.0.0
-    , deriving-compat >=0.5
+    , deriving-compat >=0.5.0
     , hashable >=1.2.5
     , prettyprinter >=1.2.1
     , text >=1.2.0
@@ -63,7 +63,7 @@ test-suite elm-syntax-test
   build-depends:
       base >=4.7 && <5
     , bound >=2.0.0
-    , deriving-compat >=0.5
+    , deriving-compat >=0.5.0
     , elm-syntax
     , hashable >=1.2.5
     , prettyprinter >=1.2.1
