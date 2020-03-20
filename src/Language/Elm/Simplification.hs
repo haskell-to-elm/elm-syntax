@@ -69,6 +69,7 @@ simplifyDefinition def =
 --   is simplified to @let xs = es in branch@ provided that @e@ matches none of
 --   @prefixBranches@ and that it matches @pat@.
 -- * case-of-case
+-- * { n = e, ... }.n = e
 --
 simplifyExpression
   :: Expression v
@@ -129,6 +130,10 @@ simplifyApplication expr args =
 
     (Expression.Global _, _) ->
       Expression.apps expr args
+
+    (Expression.Proj field, Expression.Record record:args')
+      | Just e <- lookup field record ->
+        simplifyApplication e args'
 
     (Expression.App e1 e2, _) ->
       simplifyApplication e1 (simplifyExpression e2 : args)

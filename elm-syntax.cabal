@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 4852b94fa3c78222b53566d23352534c8fab264e301bc13f0c11d479c70ec497
+-- hash: 7a5a97356a0303c135c29af83618eccb2a2d5844234020ab4cd4f38ee561609d
 
 name:           elm-syntax
-version:        0.2.0.0
+version:        0.3.0.0
 synopsis:       Elm syntax and pretty-printing
 description:    Please see the README on GitHub at <https://github.com/folq/elm-syntax#readme>
 category:       Elm, Compiler, Language

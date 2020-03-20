@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+- Simplify record projections on known records
+
 ## 0.3.0.0
 
 - Add support for parameterised types
