@@ -5,9 +5,6 @@
 {-# language OverloadedStrings #-}
 module Language.Elm.Pattern where
 
-#if !MIN_VERSION_base(4,11,0)
-import Data.Semigroup
-#endif
 import Data.Text (Text)
 
 import qualified Language.Elm.Name as Name
@@ -36,7 +33,7 @@ foldMapGlobals f pat =
       mempty
 
     Con c pats ->
-      f c <> foldMap (foldMapGlobals f) pats
+      f c `mappend` foldMap (foldMapGlobals f) pats
 
     List pats ->
       foldMap (foldMapGlobals f) pats
