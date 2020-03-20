@@ -1,13 +1,11 @@
-{-# LANGUAGE DeriveAnyClass #-}
 {-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE DerivingStrategies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
 module Language.Elm.Name where
 
-import Protolude
+import Protolude hiding (Constructor)
 
 import Data.String
 import qualified Data.Char as Char
@@ -16,12 +14,16 @@ import qualified Data.Text as Text
 type Module = [Text]
 
 newtype Local = Local Text
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype IsString
-  deriving anyclass (Hashable)
+  deriving (Eq, Ord, Show, Generic)
 
 data Qualified = Qualified Module Text
-  deriving (Eq, Ord, Show, Generic, Hashable)
+  deriving (Eq, Ord, Show, Generic)
+
+newtype Field = Field Text
+  deriving (Eq, Ord, Show, Generic)
+
+newtype Constructor = Constructor Text
+  deriving (Eq, Ord, Show, Generic)
 
 isConstructor :: Qualified -> Bool
 isConstructor name =
@@ -41,6 +43,13 @@ isConstructor name =
     _ ->
       False
 
+instance IsString Local where
+  fromString = Local . fromString
+
+instance Hashable Local where
+  hashWithSalt s (Local t) =
+    hashWithSalt s t
+
 instance IsString Qualified where
   fromString s =
     case unsnoc $ Text.splitOn "." $ fromString s of
@@ -53,12 +62,18 @@ instance IsString Qualified where
       Just (xs, x) ->
         Qualified xs x
 
-newtype Field = Field Text
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype IsString
-  deriving anyclass (Hashable)
+instance Hashable Qualified
 
-newtype Constructor = Constructor Text
-  deriving stock (Eq, Ord, Show, Generic)
-  deriving newtype IsString
-  deriving anyclass (Hashable)
+instance IsString Field where
+  fromString = Field . fromString
+
+instance Hashable Field where
+  hashWithSalt s (Field t) =
+    hashWithSalt s t
+
+instance IsString Constructor where
+  fromString = Constructor . fromString
+
+instance Hashable Constructor where
+  hashWithSalt s (Constructor t) =
+    hashWithSalt s t
