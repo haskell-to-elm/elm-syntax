@@ -12,7 +12,6 @@ import Protolude
 
 import Bound
 import Bound.Var (unvar)
-import Data.Bifoldable
 import Data.Eq.Deriving
 import Data.Ord.Deriving
 import Data.String
@@ -155,7 +154,7 @@ foldMapGlobals f expr =
     Case e branches ->
       foldMapGlobals f e <>
       foldMap
-        (bifoldMap (Pattern.foldMapGlobals f) (foldMapGlobals f . Bound.fromScope))
+        (\(pat, scope) -> Pattern.foldMapGlobals f pat <> foldMapGlobals f (Bound.fromScope scope))
         branches
 
     List es ->
