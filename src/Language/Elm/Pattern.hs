@@ -1,4 +1,3 @@
-{-# language CPP #-}
 {-# language DeriveFoldable #-}
 {-# language DeriveFunctor #-}
 {-# language DeriveTraversable #-}
@@ -33,7 +32,7 @@ foldMapGlobals f pat =
       mempty
 
     Con c pats ->
-      f c `mappend` foldMap (foldMapGlobals f) pats
+      f c <> foldMap (foldMapGlobals f) pats
 
     List pats ->
       foldMap (foldMapGlobals f) pats

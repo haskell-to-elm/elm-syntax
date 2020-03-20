@@ -1,5 +1,4 @@
 {-# language OverloadedStrings #-}
-{-# language CPP #-}
 {-# language ViewPatterns #-}
 module Language.Elm.Simplification
   ( simplifyDefinition
@@ -11,9 +10,6 @@ import qualified Bound.Scope as Scope
 import Bound.Var (unvar)
 import Data.Bifunctor
 import Data.Foldable (fold)
-#if !MIN_VERSION_base(4,11,0)
-import Data.Semigroup
-#endif
 import Data.Text (Text)
 import qualified Data.Text as Text
 
@@ -259,10 +255,6 @@ instance Semigroup a => Semigroup (Match a) where
 instance Monoid a => Monoid (Match a) where
   mempty =
     Yep mempty
-
-#if !MIN_VERSION_base(4,11,0)
-  mappend = (<>)
-#endif
 
 match
   :: Expression v

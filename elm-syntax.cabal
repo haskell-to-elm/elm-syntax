@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 433865319b171238617281a2a9f328f82e98b39f6558f9004efa3ffc133d1bac
+-- hash: 0ef776b3daae1808ec6d9199f2bba0aa2018977a5ba9d2f847c6940ecbcf85aa
 
 name:           elm-syntax
 version:        0.2.0.0
@@ -18,7 +18,7 @@ maintainer:     fredriksson.olle@gmail.com
 copyright:      2019 Olle Fredriksson
 license:        BSD3
 license-file:   LICENSE
-tested-with:    GHC == 8.0.2, GHC == 8.2.2, GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.3
+tested-with:    GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.3
 build-type:     Simple
 extra-source-files:
     README.md

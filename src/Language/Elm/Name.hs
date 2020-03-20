@@ -1,16 +1,14 @@
-{-# LANGUAGE DeriveGeneric #-}
-{-# LANGUAGE CPP #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE ViewPatterns #-}
+{-# language DeriveAnyClass #-}
+{-# language DeriveGeneric #-}
+{-# language DerivingStrategies #-}
+{-# language GeneralizedNewtypeDeriving #-}
+{-# language OverloadedStrings #-}
+{-# language ViewPatterns #-}
 module Language.Elm.Name where
 
 import Data.Bifunctor
 import qualified Data.Char as Char
 import Data.Hashable
-#if !MIN_VERSION_base(4,11,0)
-import Data.Semigroup
-#endif
 import Data.String
 import Data.Text (Text)
 import qualified Data.Text as Text
@@ -19,16 +17,23 @@ import GHC.Generics (Generic)
 type Module = [Text]
 
 newtype Local = Local Text
-  deriving (Eq, Ord, Show, Generic)
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (IsString)
+  deriving anyclass (Hashable)
 
 data Qualified = Qualified Module Text
   deriving (Eq, Ord, Show, Generic)
+  deriving anyclass (Hashable)
 
 newtype Field = Field Text
-  deriving (Eq, Ord, Show, Generic)
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (IsString)
+  deriving anyclass (Hashable)
 
 newtype Constructor = Constructor Text
-  deriving (Eq, Ord, Show, Generic)
+  deriving stock (Eq, Ord, Show, Generic)
+  deriving newtype (IsString)
+  deriving anyclass (Hashable)
 
 isConstructor :: Qualified -> Bool
 isConstructor name =
@@ -47,13 +52,6 @@ isConstructor name =
 
     _ ->
       False
-
-instance IsString Local where
-  fromString = Local . fromString
-
-instance Hashable Local where
-  hashWithSalt s (Local t) =
-    hashWithSalt s t
 
 instance IsString Qualified where
   fromString s =
@@ -74,19 +72,3 @@ instance IsString Qualified where
       go :: a -> [a] -> ([a], a)
       go a [] = ([], a)
       go a (a':as) = first (a:) $ go a' as
-
-instance Hashable Qualified
-
-instance IsString Field where
-  fromString = Field . fromString
-
-instance Hashable Field where
-  hashWithSalt s (Field t) =
-    hashWithSalt s t
-
-instance IsString Constructor where
-  fromString = Constructor . fromString
-
-instance Hashable Constructor where
-  hashWithSalt s (Constructor t) =
-    hashWithSalt s t
