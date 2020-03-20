@@ -2,6 +2,8 @@
 
 ## Unreleased changes
 
+## 0.3.0.0
+
 - Add support for parameterised types
 - Handle Basics.() in isConstructor check
 - Simplify case-of-case expressions
