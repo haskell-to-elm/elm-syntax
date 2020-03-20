@@ -1,15 +1,16 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE NoImplicitPrelude #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
 module Language.Elm.Name where
 
-import Protolude hiding (Constructor)
-
-import Data.String
+import Data.Bifunctor
 import qualified Data.Char as Char
+import Data.Hashable
+import Data.String
+import Data.Text (Text)
 import qualified Data.Text as Text
+import GHC.Generics (Generic)
 
 type Module = [Text]
 
@@ -54,13 +55,21 @@ instance IsString Qualified where
   fromString s =
     case unsnoc $ Text.splitOn "." $ fromString s of
       Nothing ->
-        panic "Empty name"
+        error "Empty name"
 
       Just ([], x) ->
-        panic $ "Unqualified name " <> show x
+        error $ "Unqualified name " <> show x
 
       Just (xs, x) ->
         Qualified xs x
+    where
+      unsnoc :: [a] -> Maybe ([a], a)
+      unsnoc [] = Nothing
+      unsnoc (a:as) = Just $ go a as
+
+      go :: a -> [a] -> ([a], a)
+      go a [] = ([], a)
+      go a (a':as) = first (a:) $ go a' as
 
 instance Hashable Qualified
 

@@ -1,11 +1,10 @@
 {-# language DeriveFoldable #-}
 {-# language DeriveFunctor #-}
 {-# language DeriveTraversable #-}
-{-# language NoImplicitPrelude #-}
 {-# language OverloadedStrings #-}
 module Language.Elm.Pattern where
 
-import Protolude
+import Data.Text (Text)
 
 import qualified Language.Elm.Name as Name
 

@@ -8,13 +8,13 @@
 {-# language TemplateHaskell #-}
 module Language.Elm.Expression where
 
-import Protolude
-
 import Bound
 import Bound.Var (unvar)
+import Control.Monad
 import Data.Eq.Deriving
 import Data.Ord.Deriving
 import Data.String
+import Data.Text (Text)
 import Text.Show.Deriving
 
 import qualified Language.Elm.Name as Name
@@ -106,7 +106,7 @@ tuple e1 e2 = apps "Basics.," [e1, e2]
 
 lets :: Eq b => [(b, Expression v)] -> Scope b Expression v -> Expression v
 lets =
-  go (panic "Language.Elm.Expression.lets unbound var") identity
+  go (error "Language.Elm.Expression.lets unbound var") id
   where
     go :: Eq b => (b -> v') -> (v -> v') -> [(b, Expression v)] -> Scope b Expression v -> Expression v'
     go boundVar freeVar bindings scope =

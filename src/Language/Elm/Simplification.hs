@@ -6,11 +6,10 @@ module Language.Elm.Simplification
   , simplifyExpression
   ) where
 
-import Protolude
-
 import Bound
 import qualified Bound.Scope as Scope
 import Bound.Var (unvar)
+import Data.Bifunctor
 import Data.Foldable (fold)
 #if !MIN_VERSION_base(4,11,0)
 import Data.Semigroup

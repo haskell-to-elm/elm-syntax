@@ -4,8 +4,8 @@
 {-# language OverloadedStrings #-}
 module Language.Elm.Type where
 
-import Protolude hiding (Type)
-
+import Control.Monad
+import Data.Foldable
 import Data.String
 
 import qualified Language.Elm.Name as Name

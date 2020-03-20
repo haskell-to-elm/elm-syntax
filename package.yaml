@@ -24,8 +24,8 @@ dependencies:
 - base >= 4.7 && < 5
 - bound >= 2.0.0
 - deriving-compat >= 0.5
+- hashable >= 1.2.5
 - prettyprinter >= 1.2.1
-- protolude >= 0.2.3
 - text >= 1.2.0
 - unordered-containers >= 0.2.8
 

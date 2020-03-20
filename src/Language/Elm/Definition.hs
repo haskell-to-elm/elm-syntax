@@ -1,7 +1,6 @@
 module Language.Elm.Definition where
 
-import Protolude hiding (Type)
-
+import Data.Void
 import Language.Elm.Expression (Expression)
 import qualified Language.Elm.Expression as Expression
 import qualified Language.Elm.Name as Name

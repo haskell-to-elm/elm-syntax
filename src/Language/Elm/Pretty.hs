@@ -1,4 +1,3 @@
-{-# language NoImplicitPrelude #-}
 {-# language OverloadedStrings #-}
 {-# language ViewPatterns #-}
 module Language.Elm.Pretty
@@ -26,16 +25,18 @@ module Language.Elm.Pretty
   , type_
   ) where
 
-import Protolude hiding (Type, local, list, moduleName)
-
 import qualified Bound
 import qualified Bound.Var as Bound
+import Data.Foldable
 import Data.HashMap.Lazy (HashMap)
 import qualified Data.HashMap.Lazy as HashMap
 import Data.HashSet (HashSet)
 import qualified Data.HashSet as HashSet
+import Data.List (sort, intersperse)
+import Data.Maybe (isNothing)
 import Data.String
 import Data.Text.Prettyprint.Doc
+import Data.Void
 
 import Language.Elm.Definition (Definition)
 import qualified Language.Elm.Definition as Definition
@@ -133,7 +134,7 @@ extend :: Environment v -> (Environment (Bound.Var () v), Name.Local)
 extend env =
   case freshLocals env of
     [] ->
-      panic "Language.Elm.Pretty no locals"
+      error "Language.Elm.Pretty no locals"
 
     fresh:freshLocals' ->
       ( env
@@ -162,7 +163,7 @@ extendPat env pat =
     lookupVar i =
       case HashMap.lookup i bindings of
         Nothing ->
-          panic "Unbound pattern variable"
+          error "Unbound pattern variable"
 
         Just v ->
           v
@@ -424,10 +425,10 @@ expression env prec expr =
       apps (expression env) prec fun args
 
     Expression.Global _ ->
-      panic "Language.Elm.Pretty expression Global"
+      error "Language.Elm.Pretty expression Global"
 
     Expression.App {} ->
-      panic "Language.Elm.Pretty expression App"
+      error "Language.Elm.Pretty expression App"
 
     Expression.Let {} ->
       parensWhen (prec > letPrec) $
@@ -612,10 +613,10 @@ type_ env prec t =
       apps (type_ env) prec fun args
 
     Type.Global _ ->
-      panic "Language.Elm.Pretty type_ Global"
+      error "Language.Elm.Pretty type_ Global"
 
     Type.App {} ->
-      panic "Language.Elm.Pretty type_ App"
+      error "Language.Elm.Pretty type_ App"
 
     Type.Fun t1 t2 ->
       parensWhen (prec > funPrec) $
@@ -656,7 +657,7 @@ parensWhen b =
     parens
 
   else
-    identity
+    id
 
 appPrec, letPrec, lamPrec, casePrec, ifPrec, funPrec, projPrec :: Int
 appPrec = 10
