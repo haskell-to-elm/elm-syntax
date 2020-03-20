@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE ViewPatterns #-}
@@ -7,6 +8,9 @@ module Language.Elm.Name where
 import Data.Bifunctor
 import qualified Data.Char as Char
 import Data.Hashable
+#if !MIN_VERSION_base(4,11,0)
+import Data.Semigroup
+#endif
 import Data.String
 import Data.Text (Text)
 import qualified Data.Text as Text

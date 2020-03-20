@@ -1,3 +1,4 @@
+{-# language CPP #-}
 {-# language DeriveAnyClass #-}
 {-# language DeriveFoldable #-}
 {-# language DeriveFunctor #-}
@@ -13,6 +14,9 @@ import Bound.Var (unvar)
 import Control.Monad
 import Data.Eq.Deriving
 import Data.Ord.Deriving
+#if !MIN_VERSION_base(4,11,0)
+import Data.Semigroup
+#endif
 import Data.String
 import Data.Text (Text)
 import Text.Show.Deriving

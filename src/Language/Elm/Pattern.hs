@@ -1,9 +1,13 @@
+{-# language CPP #-}
 {-# language DeriveFoldable #-}
 {-# language DeriveFunctor #-}
 {-# language DeriveTraversable #-}
 {-# language OverloadedStrings #-}
 module Language.Elm.Pattern where
 
+#if !MIN_VERSION_base(4,11,0)
+import Data.Semigroup
+#endif
 import Data.Text (Text)
 
 import qualified Language.Elm.Name as Name

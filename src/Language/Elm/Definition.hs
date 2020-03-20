@@ -1,6 +1,11 @@
+{-# language CPP #-}
 module Language.Elm.Definition where
 
+#if !MIN_VERSION_base(4,11,0)
+import Data.Semigroup
+#endif
 import Data.Void
+
 import Language.Elm.Expression (Expression)
 import qualified Language.Elm.Expression as Expression
 import qualified Language.Elm.Name as Name

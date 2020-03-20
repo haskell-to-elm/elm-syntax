@@ -1,4 +1,5 @@
 {-# language DeriveFoldable #-}
+{-# language CPP #-}
 {-# language DeriveFunctor #-}
 {-# language DeriveTraversable #-}
 {-# language OverloadedStrings #-}
@@ -6,6 +7,9 @@ module Language.Elm.Type where
 
 import Control.Monad
 import Data.Foldable
+#if !MIN_VERSION_base(4,11,0)
+import Data.Semigroup
+#endif
 import Data.String
 
 import qualified Language.Elm.Name as Name
