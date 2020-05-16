@@ -1,3 +1,4 @@
+{-# language LambdaCase #-}
 {-# language OverloadedStrings #-}
 {-# language ViewPatterns #-}
 module Language.Elm.Pretty
@@ -92,8 +93,21 @@ module_ mname defs =
       HashSet.map (\(Name.Qualified m _) -> m) $
       HashSet.filter (isNothing . defaultImport) $
       foldMap (Definition.foldMapGlobals HashSet.singleton) defs
+
+    exports =
+      indent 4 $
+      (<> line <> ")") $
+      vsep $
+      zipWith (<>) ("( " : repeat ", ") $
+      map export defs
+
+    export = \case
+      Definition.Constant (Name.Qualified _ name) _ _ _ -> pretty name
+      Definition.Type (Name.Qualified _ name) _ _ -> pretty name <> "(..)"
+      Definition.Alias (Name.Qualified _ name) _ _ -> pretty name
+
   in
-  "module" <+> moduleName mname <+> "exposing (..)" <> line <> line <>
+  "module" <+> moduleName mname <+> "exposing" <> line <> exports <> line <> line <>
   mconcat ["import" <+> moduleName import_ <> line | import_ <- imports] <> line <> line <>
   mconcat (intersperse (line <> line <> line) [definition env def | def <- defs])
 
