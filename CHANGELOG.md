@@ -1,8 +1,10 @@
 # Changelog for elm-syntax
 
-## Unreleased changes
+## 0.3.1.0
 
 - Simplify record projections on known records
+- Write explicit export lists
+- Fix build with GHC 9.0. (see [#2](https://github.com/folq/elm-syntax/pull/2))
 
 ## 0.3.0.0
 
