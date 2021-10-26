@@ -7,6 +7,7 @@
 {-# language ScopedTypeVariables #-}
 {-# language StandaloneDeriving #-}
 {-# language TemplateHaskell #-}
+{-# language TupleSections #-}
 module Language.Elm.Expression where
 
 import Bound
@@ -44,8 +45,44 @@ instance Applicative Expression where
   (<*>) = ap
 
 instance Monad Expression where
-  (>>=) =
-    flip $ bind Global
+  expression >>= f =
+    case expression of
+      Var v ->
+        f v
+
+      Global g ->
+        Global g
+  
+      App g x ->
+        App (g >>= f) (x >>= f)
+
+      Let e s ->
+        Let (e >>= f) (s >>>= f)
+
+      Lam e -> 
+        Lam (e >>>= f)
+
+      Record fields ->
+        Record (map (fmap (>>= f)) fields)
+  
+      Proj fieldName ->
+        Proj fieldName
+
+      Case e patterns ->
+        Case (e >>= f) (map (fmap (>>>= f)) patterns)
+  
+      List es -> 
+        List (map (>>= f) es)
+
+      String text ->
+        String text
+
+      Int integer -> 
+        Int integer
+
+      Float double -> 
+        Float double
+
 
 bind :: forall v v'. (Name.Qualified -> Expression v') -> (v -> Expression v') -> Expression v -> Expression v'
 bind global var expression =
