@@ -1,5 +1,9 @@
 # Changelog for elm-syntax
 
+## 0.3.2.0
+
+- The `Monad` instance for `Expression` has been redefined, leading to considerably faster performance. (see [#4](https://github.com/folq/elm-syntax/pull/4))
+
 ## 0.3.1.0
 
 - Simplify record projections on known records
