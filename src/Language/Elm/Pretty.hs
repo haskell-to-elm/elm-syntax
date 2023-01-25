@@ -309,9 +309,6 @@ fixity qname =
     "Basics.++" ->
       rightAssoc 5
 
-    "Basics.++" ->
-      rightAssoc 5
-
     "List.::" ->
       rightAssoc 5
 
