@@ -131,13 +131,14 @@ bind global var expression =
       bind (fmap F . global) (unvar (pure . B) (fmap F . var)) .
       fromScope
 
-deriving instance Eq v => Eq (Expression v)
-deriving instance Ord v => Ord (Expression v)
-deriving instance Show v => Show (Expression v)
-
 deriveEq1 ''Expression
+deriving instance Eq v => Eq (Expression v)
+
 deriveOrd1 ''Expression
+deriving instance Ord v => Ord (Expression v)
+
 deriveShow1 ''Expression
+deriving instance Show v => Show (Expression v)
 
 instance IsString (Expression v) where
   fromString = Global . fromString
