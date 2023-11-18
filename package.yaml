@@ -5,7 +5,7 @@ license:             BSD3
 author:              "Olle Fredriksson"
 maintainer:          "fredriksson.olle@gmail.com"
 copyright:           "2019 Olle Fredriksson"
-tested-with:         GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.3
+tested-with:         GHC == 8.4.3, GHC == 8.6.5, GHC == 8.8.3, GHC == 9.2.5
 
 extra-source-files:
 - README.md
@@ -25,7 +25,7 @@ dependencies:
 - bound >= 2.0.0
 - deriving-compat >= 0.5
 - hashable >= 1.2.5
-- prettyprinter >= 1.2.1
+- prettyprinter >= 1.6.0
 - text >= 1.2.0
 - unordered-containers >= 0.2.8
 - deriving-compat >= 0.5.0

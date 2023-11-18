@@ -36,7 +36,7 @@ import qualified Data.HashSet as HashSet
 import Data.List (sort, intersperse)
 import Data.Maybe (isNothing)
 import Data.String
-import Data.Text.Prettyprint.Doc
+import Prettyprinter
 import Data.Void
 
 import Language.Elm.Definition (Definition)
@@ -305,9 +305,6 @@ fixity qname =
 
     Name.Qualified ["Parser"] "|." ->
       leftAssoc 6
-
-    "Basics.++" ->
-      rightAssoc 5
 
     "Basics.++" ->
       rightAssoc 5
