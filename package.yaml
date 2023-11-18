@@ -25,7 +25,7 @@ dependencies:
 - bound >= 2.0.0
 - deriving-compat >= 0.5
 - hashable >= 1.2.5
-- prettyprinter >= 1.2.1
+- prettyprinter >= 1.6.0
 - text >= 1.2.0
 - unordered-containers >= 0.2.8
 - deriving-compat >= 0.5.0
