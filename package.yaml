@@ -1,6 +1,6 @@
 name:                elm-syntax
 version:             0.3.2.0
-github:              "folq/elm-syntax"
+github:              "haskell-to-elm/elm-syntax"
 license:             BSD3
 author:              "Olle Fredriksson"
 maintainer:          "fredriksson.olle@gmail.com"
@@ -18,7 +18,7 @@ category:            Elm, Compiler, Language
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/folq/elm-syntax#readme>
+description:         Please see the README on GitHub at <https://github.com/haskell-to-elm/elm-syntax#readme>
 
 dependencies:
 - base >= 4.7 && < 5
