@@ -1,5 +1,5 @@
 name:                elm-syntax
-version:             0.3.2.0
+version:             0.3.3.0
 github:              "haskell-to-elm/elm-syntax"
 license:             BSD3
 author:              "Olle Fredriksson"
