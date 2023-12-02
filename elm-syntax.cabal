@@ -1,13 +1,13 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.35.2.
+-- This file has been generated from package.yaml by hpack version 0.36.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 3f7c159dd3712884029db0619760bbb75edf47015c0108d9cb21f1c6027701e2
+-- hash: a3e365d3cf561f985813175da49dc02d42f3493a20c53389969c4b15f3e4f5c4
 
 name:           elm-syntax
-version:        0.3.2.0
+version:        0.3.3.0
 synopsis:       Elm syntax and pretty-printing
 description:    Please see the README on GitHub at <https://github.com/haskell-to-elm/elm-syntax#readme>
 category:       Elm, Compiler, Language
